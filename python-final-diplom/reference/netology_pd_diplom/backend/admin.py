@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from backend.models import User, Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
+from models import User, Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
     Contact, ConfirmEmailToken
 
 
@@ -20,8 +20,15 @@ class CustomUserAdmin(UserAdmin):
         }),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
-    list_display = ('email', 'first_name', 'last_name', 'is_staff')
-
+    add_fieldsets = (
+                        (None, {
+                            'classes': ('wide',),
+                            'fields': ('email', 'password1', 'password2', 'type', 'is_staff', 'is_active'),
+                        }),
+    )
+    list_display = ('email', 'first_name', 'last_name', 'type','is_staff', 'is_active')
+    search_fields = ('email', 'first_name', 'last_name')
+    ordering = ('email',)
 
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
