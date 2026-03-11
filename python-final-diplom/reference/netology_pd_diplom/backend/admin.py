@@ -62,7 +62,10 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'category')
+    search_fields = ('name',)
+    list_filter = ('category',)
+    inlines = [ProductInfoInline, ProductParameterInline]
 
 
 @admin.register(ProductInfo)
