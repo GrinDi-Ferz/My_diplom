@@ -11,7 +11,10 @@ class ProductInfoInline(admin.TabularInline):
     extra = 0
 
 
-
+class ProductParameterInline(admin.TabularInline):
+    model = ProductParameter
+    fields = ('parameter', 'value')
+    extra = 0
 
 
 @admin.register(User)
