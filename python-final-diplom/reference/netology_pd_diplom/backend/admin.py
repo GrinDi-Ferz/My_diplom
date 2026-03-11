@@ -4,6 +4,15 @@ from django.contrib.auth.admin import UserAdmin
 from models import User, Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
     Contact, ConfirmEmailToken
 
+# Inline-редакторы
+class ProductInfoInline(admin.TabularInline):
+    model = ProductInfo
+    fields = ('product', 'external_id', 'model', 'quantity', 'price', 'price_rrc', 'shop')
+    extra = 0
+
+
+
+
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
@@ -21,10 +30,10 @@ class CustomUserAdmin(UserAdmin):
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
-                        (None, {
-                            'classes': ('wide',),
-                            'fields': ('email', 'password1', 'password2', 'type', 'is_staff', 'is_active'),
-                        }),
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2', 'type', 'is_staff', 'is_active'),
+        }),
     )
     list_display = ('email', 'first_name', 'last_name', 'type','is_staff', 'is_active')
     search_fields = ('email', 'first_name', 'last_name')
