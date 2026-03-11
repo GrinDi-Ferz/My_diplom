@@ -55,7 +55,9 @@ class ShopAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name',)
+    filter_horizontal = ('shops',)
+    search_fields = ('name',)
 
 
 @admin.register(Product)
