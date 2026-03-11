@@ -17,6 +17,12 @@ class ProductParameterInline(admin.TabularInline):
     extra = 0
 
 
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    fields = ('product_info', 'quantity')
+    extra = 0
+
+
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     """
