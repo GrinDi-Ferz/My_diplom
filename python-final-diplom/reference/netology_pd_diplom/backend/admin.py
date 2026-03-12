@@ -117,3 +117,7 @@ class ConfirmEmailTokenAdmin(admin.ModelAdmin):
     raw_id_fields = ('user',)
     readonly_fields = ('key', 'created_at')
     search_fields = ('user__email', 'key')
+
+admin.site.site_header = "Склад администратора"
+admin.site.site_title = "Админка склада"
+admin.site.index_title = "Добро пожаловать в админ-панель склада"
