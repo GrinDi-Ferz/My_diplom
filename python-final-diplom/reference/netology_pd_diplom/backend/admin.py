@@ -90,7 +90,13 @@ class ProductParameterAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'user', 'dt', 'state', 'contact')
+    list_filter = ('state', 'dt')
+    search_fields = ('user__email', 'contact__city', 'contact__street')
+    inlines = [OrderItemInline]
+    raw_id_fields = ('user', 'contact')
+    date_hierarchy = 'dt'
+    ordering = ('-dt',)
 
 
 @admin.register(OrderItem)
