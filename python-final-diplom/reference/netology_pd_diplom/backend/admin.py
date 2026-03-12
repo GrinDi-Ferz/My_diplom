@@ -78,7 +78,8 @@ class ProductInfoAdmin(admin.ModelAdmin):
 
 @admin.register(Parameter)
 class ParameterAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name',)
+
 
 
 @admin.register(ProductParameter)
