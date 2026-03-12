@@ -101,7 +101,8 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('order', 'product_info', 'quantity')
+    raw_id_fields = ('order', 'product_info')
 
 
 @admin.register(Contact)
