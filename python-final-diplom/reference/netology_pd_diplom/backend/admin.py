@@ -84,7 +84,8 @@ class ParameterAdmin(admin.ModelAdmin):
 
 @admin.register(ProductParameter)
 class ProductParameterAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('product_info', 'parameter', 'value')
+    raw_id_fields = ('product_info', 'parameter')
 
 
 @admin.register(Order)
