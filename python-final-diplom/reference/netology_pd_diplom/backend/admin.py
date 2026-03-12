@@ -113,4 +113,7 @@ class ContactAdmin(admin.ModelAdmin):
 
 @admin.register(ConfirmEmailToken)
 class ConfirmEmailTokenAdmin(admin.ModelAdmin):
-    list_display = ('user', 'key', 'created_at',)
+    list_display = ('user', 'key', 'created_at')
+    raw_id_fields = ('user',)
+    readonly_fields = ('key', 'created_at')
+    search_fields = ('user__email', 'key')
