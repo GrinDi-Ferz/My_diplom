@@ -70,7 +70,10 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(ProductInfo)
 class ProductInfoAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('product', 'shop', 'external_id', 'quantity', 'price', 'price_rrc')
+    list_filter = ('shop', 'product')
+    search_fields = ('product__name', 'shop__name', 'external_id')
+    raw_id_fields = ('product', 'shop')
 
 
 @admin.register(Parameter)
