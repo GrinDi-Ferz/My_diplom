@@ -107,7 +107,8 @@ class OrderItemAdmin(admin.ModelAdmin):
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('city', 'street', 'house', 'phone', 'user')
+    raw_id_fields = ('user',)
 
 
 @admin.register(ConfirmEmailToken)
