@@ -15,11 +15,11 @@ from rest_framework.views import APIView
 from ujson import loads as load_json
 from yaml import load as load_yaml, Loader
 
-from models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
+from .models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter, Order, OrderItem, \
     Contact, ConfirmEmailToken
-from serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
+from .serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
     OrderItemSerializer, OrderSerializer, ContactSerializer
-from signals import new_user_registered, new_order
+from .signals import new_user_registered, new_order
 
 
 class RegisterAccount(APIView):
