@@ -74,3 +74,28 @@ def send_confirm_email(self, user_email, token_key, user_name=None):
     except Exception as exc:
         logger.exception("Не удалось отправить письмо с подтверждением на %s", user_email)
         raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def notify_order_update(self, user_email, order_status, order_id=None):
+    """
+    Асинхронное уведомление об обновлении статуса заказа.
+    Параметры:
+    - user_email: адрес получателя
+    - order_status: новый статус заказа
+    - order_id: идентификатор заказа (опционально)
+    """
+    subject = "Обновление статуса заказа"
+    order_ref = f"Заказ №{order_id}" if order_id else "Ваш заказ"
+    message = (
+        f"Уважаемый клиент,\n\n"
+        f"{order_ref} обновлён.\n"
+        f"Новый статус: {order_status}.\n\n"
+        "Спасибо за покупку."
+    )
+
+    try:
+        _send_email(subject, user_email, message)
+    except Exception as exc:
+        logger.exception("Не удалось отправить письмо об обновлении статуса заказа для %s", user_email)
+        raise self.retry(exc=exc)
