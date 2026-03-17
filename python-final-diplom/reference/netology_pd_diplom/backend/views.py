@@ -1,4 +1,5 @@
 from distutils.util import strtobool
+import secrets
 from rest_framework.request import Request
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
@@ -19,8 +20,7 @@ from .models import Shop, Category, Product, ProductInfo, Parameter, ProductPara
     Contact, ConfirmEmailToken
 from .serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
     OrderItemSerializer, OrderSerializer, ContactSerializer
-from .signals import new_user_registered, new_order
-from .tasks import send_password_reset_email, send_welcome_email, notify_order_created
+from .tasks import send_password_reset_email, send_confirm_email, notify_order_update
 
 class RegisterAccount(APIView):
     """
@@ -43,7 +43,6 @@ class RegisterAccount(APIView):
         if {'first_name', 'last_name', 'email', 'password', 'company', 'position'}.issubset(request.data):
 
             # проверяем пароль на сложность
-            sad = 'asd'
             try:
                 validate_password(request.data['password'])
             except Exception as password_error:
@@ -61,6 +60,13 @@ class RegisterAccount(APIView):
                     user = user_serializer.save()
                     user.set_password(request.data['password'])
                     user.save()
+                    # Асинхронная отправка письма подтверждения (генерируем токен и отправляем письмо)
+                    try:
+                        token_key = secrets.token_urlsafe(32)
+                        ConfirmEmailToken.objects.create(user=user, key=token_key)
+                        send_confirm_email.delay(user.email, token_key, user.get_full_name() or user.username)
+                    except Exception:
+                        pass
                     return JsonResponse({'Status': True})
                 else:
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
@@ -328,6 +334,10 @@ class BasketView(APIView):
                     else:
 
                         return JsonResponse({'Status': False, 'Errors': serializer.errors})
+                # Асинхронно уведомляем о создании/обновлении корзины
+                if objects_created > 0:
+                    # Используем существующую задачу уведомления об обновлении заказа
+                    notify_order_update.delay(request.user.email, 'basket', basket.id)
 
                 return JsonResponse({'Status': True, 'Создано объектов': objects_created})
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
@@ -389,6 +399,9 @@ class BasketView(APIView):
                     if type(order_item['id']) == int and type(order_item['quantity']) == int:
                         objects_updated += OrderItem.objects.filter(order_id=basket.id, id=order_item['id']).update(
                             quantity=order_item['quantity'])
+                if objects_updated > 0:
+                    # Асинхронно уведомляем об обновлении корзины
+                    notify_order_update.delay(request.user.email, 'basket', basket.id)
 
                 return JsonResponse({'Status': True, 'Обновлено объектов': objects_updated})
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
@@ -732,7 +745,12 @@ class OrderView(APIView):
                     return JsonResponse({'Status': False, 'Errors': 'Неправильно указаны аргументы'})
                 else:
                     if is_updated:
-                        new_order.send(sender=self.__class__, user_id=request.user.id)
+                        # Локальный импорт и вызов задачи
+                        try:
+                            from .tasks import notify_order_update
+                            notify_order_update.delay(request.user.email, 'order', request.data['id'])
+                        except Exception:
+                            pass
                         return JsonResponse({'Status': True})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
