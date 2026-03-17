@@ -49,3 +49,28 @@ def send_password_reset_email(self, user_email, user_name, token):
     except Exception as exc:
         logger.exception("Не удалось отправить письмо с сбросом пароля по адресу %s", user_email)
         raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def send_confirm_email(self, user_email, token_key, user_name=None):
+    """
+    Асинхронная отправка письма с подтверждением электронной почты.
+    Параметры:
+    - user_email: адрес получателя
+    - token_key: ключ токена подтверждения
+    - user_name: имя пользователя (необязательно)
+    """
+    subject = "Подтверждение адреса электронной почты"
+    name = user_name or user_email
+    message = (
+        f"Здравствуйте, {name},\n\n"
+        f"Ваш токен подтверждения адреса: {token_key}\n\n"
+        "Пожалуйста, используйте этот токен для подтверждения адреса.\n"
+        "Если вы не запрашивали подтверждение, проигнорируйте это письмо."
+    )
+
+    try:
+        _send_email(subject, user_email, message)
+    except Exception as exc:
+        logger.exception("Не удалось отправить письмо с подтверждением на %s", user_email)
+        raise self.retry(exc=exc)
