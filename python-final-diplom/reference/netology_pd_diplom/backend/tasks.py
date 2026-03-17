@@ -23,3 +23,29 @@ def _send_email(subject: str, to_email: str, message: str) -> int:
         raise
 
 
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def send_password_reset_email(self, user_email, user_name, token):
+    """
+    Асинхронная отправка письма со сбросом пароля.
+    Параметры:
+    - user_email: адрес получателя
+    - user_name: имя пользователя (для контекста в тексте письма)
+    - token: токен сброса
+    """
+    subject = f"Сброс пароля для {user_name}"
+    lines = [
+        f"Здравствуйте, {user_name},",
+        "",
+        f"Используйте следующий код для сброса пароля: {token}",
+    ]
+    lines += [
+        "",
+        "Если вы не запрашивали сброс пароля, проигнорируйте это письмо.",
+    ]
+    message = "\n".join(lines)
+
+    try:
+        _send_email(subject, user_email, message)
+    except Exception as exc:
+        logger.exception("Не удалось отправить письмо с сбросом пароля по адресу %s", user_email)
+        raise self.retry(exc=exc)
