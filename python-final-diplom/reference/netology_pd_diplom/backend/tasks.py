@@ -1,6 +1,9 @@
 from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
+import yaml
+import requests
+from django.db import transaction
 import logging
 
 logger = logging.getLogger(__name__)
@@ -99,3 +102,80 @@ def notify_order_update(self, user_email, order_status, order_id=None):
     except Exception as exc:
         logger.exception("Не удалось отправить письмо об обновлении статуса заказа для %s", user_email)
         raise self.retry(exc=exc)
+
+
+def _save_import_to_db(shop_name, categories, goods):
+    """
+    Сохранение импортированных данных в БД.
+    - shop_name: имя магазина из YAML
+    - categories: список dicts {'id': внешн_id, 'name': str}
+    - goods: список dictов с полями: id, category (external_id), name, model, price, price_rrc, quantity, parameters
+    """
+    # Импорт моделей внутри функции, чтобы избежать циклических импортов на старте
+    from .models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter
+
+    with transaction.atomic():
+        shop, _ = Shop.objects.get_or_create(name=shop_name or "Unnamed Shop")
+
+        extid_to_category = {}
+        for cat in categories or []:
+            external_id = cat.get('id')
+            name = cat.get('name')
+            if not name:
+                continue
+            category_obj, _ = Category.objects.get_or_create(name=name)
+            category_obj.shops.add(shop)
+            if external_id is not None:
+                try:
+                    extid_to_category[int(external_id)] = category_obj
+                except (TypeError, ValueError):
+                    # пропустим некорректный внешний id
+                    pass
+
+        for item in goods or []:
+            external_id = item.get('id')
+            if external_id is None:
+                continue
+            try:
+                external_id = int(external_id)
+            except (TypeError, ValueError):
+                continue
+
+            cat_key = item.get('category')
+            category_obj = extid_to_category.get(cat_key) if cat_key is not None else None
+            if category_obj is None:
+                # Если категории нет в словаре extid_to_category, создаём категорию по имени или по формальному названию
+                category_name = item.get('name') or f"Category {cat_key}"
+                category_obj, _ = Category.objects.get_or_create(name=category_name)
+                category_obj.shops.add(shop)
+
+            product_name = item.get('name')
+            if not product_name:
+                continue
+
+            product, _ = Product.objects.get_or_create(name=product_name, category=category_obj)
+
+            defaults = {
+                'model': item.get('model', ''),
+                'quantity': int(item.get('quantity', 0)),
+                'price': int(item.get('price', 0)),
+                'price_rrc': int(item.get('price_rrc', 0)),
+            }
+
+            product_info_obj, _ = ProductInfo.objects.update_or_create(
+                product=product,
+                shop=shop,
+                external_id=external_id,
+                defaults=defaults
+            )
+
+            parameters = item.get('parameters', {}) or {}
+            for param_name, param_value in parameters.items():
+                parameter_obj, _ = Parameter.objects.get_or_create(name=str(param_name))
+                ProductParameter.objects.update_or_create(
+                    product_info=product_info_obj,
+                    parameter=parameter_obj,
+                    defaults={'value': str(param_value)}
+                )
+
+        return True
