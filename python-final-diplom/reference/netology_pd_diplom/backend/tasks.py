@@ -179,3 +179,36 @@ def _save_import_to_db(shop_name, categories, goods):
                 )
 
         return True
+
+
+@shared_task(bind=True, max_retries=4, default_retry_delay=60)
+def do_import(self, source_url: str):
+    """
+    Импорт прайс-листа по URL (YAML). В реальном проекте заменить логику на запись в БД.
+    """
+    try:
+        resp = requests.get(source_url, timeout=30)
+        resp.raise_for_status()
+        data = yaml.safe_load(resp.text)
+        if not isinstance(data, dict):
+            raise ValueError("Invalid YAML structure: expected a mapping at root")
+
+        shop_name = data.get('shop')
+        categories = data.get('categories', [])
+        goods = data.get('goods', [])
+
+        logger.info("do_import: shop=%s categories=%d goods=%d from %s",
+                    shop_name, len(categories), len(goods), source_url)
+
+        # Сохраняем в БД
+        _save_import_to_db(shop_name, categories, goods)
+
+        return {
+            'status': 'done',
+            'shop': shop_name,
+            'categories': len(categories),
+            'goods': len(goods),
+        }
+    except Exception as exc:
+        logger.exception("do_import failed for %s", source_url)
+        raise self.retry(exc=exc)
