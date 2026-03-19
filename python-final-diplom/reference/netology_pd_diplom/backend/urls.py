@@ -4,6 +4,7 @@ from django_rest_passwordreset.views import reset_password_request_token, reset_
 from .views import PartnerUpdate, RegisterAccount, LoginAccount, CategoryView, ShopView, ProductInfoView, \
     BasketView, \
     AccountDetails, ContactView, OrderView, PartnerState, PartnerOrders, ConfirmAccount
+from .views_admin import DoImportTriggerAPIView, DoImportStatusAPIView
 
 app_name = 'backend'
 urlpatterns = [
@@ -22,5 +23,7 @@ urlpatterns = [
     path('products', ProductInfoView.as_view(), name='shops'),
     path('basket', BasketView.as_view(), name='basket'),
     path('order', OrderView.as_view(), name='order'),
+    path('admin/do_import/trigger/', DoImportTriggerAPIView.as_view(), name='admin_do_import_trigger'),
+    path('admin/do_import/status/<str:task_id>/', DoImportStatusAPIView.as_view(), name='admin_do_import_status'),
 
 ]

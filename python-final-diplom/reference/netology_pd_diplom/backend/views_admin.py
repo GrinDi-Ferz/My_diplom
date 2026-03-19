@@ -48,3 +48,25 @@ class DoImportTriggerAPIView(APIView):
             "task_id": str(result.id),
             "status_url": status_url
         }, status=status.HTTP_202_ACCEPTED)
+
+
+class DoImportStatusAPIView(APIView):
+    """
+    Проверка статуса задачи do_import по task_id.
+    Доступ: IsAdminUser
+    Метод GET: /admin/do_import/status/<task_id>/
+    """
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, task_id, *args, **kwargs):
+        result = AsyncResult(task_id)
+        data = {
+            "task_id": task_id,
+            "status": result.status
+        }
+        if result.ready():
+            try:
+                data["result"] = result.get()
+            except Exception as exc:
+                data["error"] = str(exc)
+        return Response(data)
