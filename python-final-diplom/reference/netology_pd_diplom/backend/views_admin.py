@@ -17,7 +17,9 @@ try:
 except Exception:
     do_import = None  # на этапе разработки может быть заглушка
 
+@extend_schema(exclude=True)
 class DoImportTriggerAPIView(APIView):
+# class DoImportTriggerAPIView(APIView):
     """
     Админская точка входа для запуска Celery задачи do_import из админки.
     Доступ: IsAdminUser
@@ -51,6 +53,7 @@ class DoImportTriggerAPIView(APIView):
         }, status=status.HTTP_202_ACCEPTED)
 
 
+@extend_schema(exclude=True)
 class DoImportStatusAPIView(APIView):
     """
     Проверка статуса задачи do_import по task_id.

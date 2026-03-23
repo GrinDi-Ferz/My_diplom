@@ -4,41 +4,6 @@ info:
   version: 1.0.0
   description: Описание API
 paths:
-  /api/v1/admin/do_import/status/{task_id}/:
-    get:
-      operationId: admin_do_import_status_retrieve
-      description: |-
-        Проверка статуса задачи do_import по task_id.
-        Доступ: IsAdminUser
-        Метод GET: /admin/do_import/status/<task_id>/
-      parameters:
-      - in: path
-        name: task_id
-        schema:
-          type: string
-        required: true
-      tags:
-      - admin
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          description: No response body
-  /api/v1/admin/do_import/trigger/:
-    post:
-      operationId: admin_do_import_trigger_create
-      description: |-
-        Админская точка входа для запуска Celery задачи do_import из админки.
-        Доступ: IsAdminUser
-        Принимает JSON: {"source_url": "<URL>"}.
-        Возвращает task_id и URL для проверки статуса задачи.
-      tags:
-      - admin
-      security:
-      - tokenAuth: []
-      responses:
-        '200':
-          description: No response body
   /api/v1/basket:
     get:
       operationId: basket_retrieve
