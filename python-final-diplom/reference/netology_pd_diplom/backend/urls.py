@@ -5,8 +5,10 @@ from .views import PartnerUpdate, RegisterAccount, LoginAccount, CategoryView, S
     BasketView, \
     AccountDetails, ContactView, OrderView, PartnerState, PartnerOrders, ConfirmAccount
 from .views_admin import DoImportTriggerAPIView, DoImportStatusAPIView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
-app_name = 'backend'
+
+
 urlpatterns = [
     path('partner/update', PartnerUpdate.as_view(), name='partner-update'),
     path('partner/state', PartnerState.as_view(), name='partner-state'),
@@ -25,5 +27,8 @@ urlpatterns = [
     path('order', OrderView.as_view(), name='order'),
     path('admin/do_import/trigger/', DoImportTriggerAPIView.as_view(), name='admin_do_import_trigger'),
     path('admin/do_import/status/<str:task_id>/', DoImportStatusAPIView.as_view(), name='admin_do_import_status'),
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
 ]
