@@ -21,7 +21,9 @@ from .models import Shop, Category, Product, ProductInfo, Parameter, ProductPara
 from .serializers import UserSerializer, CategorySerializer, ShopSerializer, ProductInfoSerializer, \
     OrderItemSerializer, OrderSerializer, ContactSerializer
 from .tasks import send_password_reset_email, send_confirm_email, notify_order_update
+from drf_spectacular.utils import extend_schema
 
+@extend_schema(exclude=True)
 class RegisterAccount(APIView):
     """
     Для регистрации покупателей
@@ -73,7 +75,7 @@ class RegisterAccount(APIView):
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
-
+@extend_schema(exclude=True)
 class ConfirmAccount(APIView):
     """
     Класс для подтверждения почтового адреса
@@ -105,7 +107,7 @@ class ConfirmAccount(APIView):
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
-
+@extend_schema(exclude=True)
 class AccountDetails(APIView):
     """
     A class for managing user account details.
@@ -172,7 +174,7 @@ class AccountDetails(APIView):
         else:
             return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
 
-
+@extend_schema(exclude=True)
 class LoginAccount(APIView):
     """
     Класс для авторизации пользователей
@@ -218,7 +220,7 @@ class ShopView(ListAPIView):
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
 
-
+@extend_schema(exclude=True)
 class ProductInfoView(APIView):
     """
         A class for searching products.
@@ -260,7 +262,7 @@ class ProductInfoView(APIView):
 
         return Response(serializer.data)
 
-
+@extend_schema(exclude=True)
 class BasketView(APIView):
     """
     A class for managing the user's shopping basket.
@@ -406,7 +408,7 @@ class BasketView(APIView):
                 return JsonResponse({'Status': True, 'Обновлено объектов': objects_updated})
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
-
+@extend_schema(exclude=True)
 class PartnerUpdate(APIView):
     """
     A class for updating partner information.
@@ -472,7 +474,7 @@ class PartnerUpdate(APIView):
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
-
+@extend_schema(exclude=True)
 class PartnerState(APIView):
     """
        A class for managing partner state.
@@ -530,7 +532,7 @@ class PartnerState(APIView):
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
-
+@extend_schema(exclude=True)
 class PartnerOrders(APIView):
     """
     Класс для получения заказов поставщиками
@@ -566,7 +568,7 @@ class PartnerOrders(APIView):
         serializer = OrderSerializer(order, many=True)
         return Response(serializer.data)
 
-
+@extend_schema(exclude=True)
 class ContactView(APIView):
     """
        A class for managing contact information.
@@ -683,7 +685,7 @@ class ContactView(APIView):
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
-
+@extend_schema(exclude=True)
 class OrderView(APIView):
     """
     Класс для получения и размешения заказов пользователями
