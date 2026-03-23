@@ -1,0 +1,13 @@
+total 48
+drwxrwxr-x 3 1000 1000 4096 Mar 23 22:44 .
+drwxr-xr-x 1 root root 4096 Mar 23 22:41 ..
+-rw-rw-r-- 1 1000 1000  356 Mar 23 22:17 Dockerfile
+-rw-rw-r-- 1 1000 1000   64 Mar 16 19:49 __init__.py
+drwxrwxr-x 2 1000 1000 4096 Mar 23 21:18 __pycache__
+-rw-rw-r-- 1 1000 1000  232 Mar 16 19:12 celery.py
+-rw-rw-r-- 1 1000 1000 1594 Mar 23 22:28 docker-compose.yml
+-rw-r--r-- 1 root root    0 Mar 23 22:44 netology_pd_diplom
+-rw-rw-r-- 1 1000 1000  150 Mar 23 22:35 requirements.txt
+-rw-rw-r-- 1 1000 1000 4514 Mar 19 20:01 settings.py
+-rw-rw-r-- 1 1000 1000  814 Mar 23 21:18 urls.py
+-rw-rw-r-- 1 1000 1000  413 Mar  4 20:12 wsgi.py

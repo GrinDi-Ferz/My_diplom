@@ -1,0 +1,74 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: web
+    environment:
+      - DJANGO_SETTINGS_MODULE=netology_pd_diplom.settings
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - appnet
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - appnet
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: celery_worker
+    command: celery -A netology_pd_diplom worker --loglevel=info
+    depends_on:
+      - redis
+      - web
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=netology_pd_diplom.settings
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    networks:
+      - appnet
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: celery_beat
+    command: celery -A netology_pd_diplom beat --loglevel=info
+    depends_on:
+      - redis
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=netology_pd_diplom.settings
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    networks:
+      - appnet
+
+volumes:
+  redis_data:
+
+networks:
+  appnet:
+    driver: bridge
