@@ -65,7 +65,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category')
     search_fields = ('name',)
     list_filter = ('category',)
-    inlines = [ProductInfoInline, ProductParameterInline]
+    # inlines = [ProductInfoInline, ProductParameterInline]
 
 
 @admin.register(ProductInfo)
@@ -74,6 +74,7 @@ class ProductInfoAdmin(admin.ModelAdmin):
     list_filter = ('shop', 'product')
     search_fields = ('product__name', 'shop__name', 'external_id')
     raw_id_fields = ('product', 'shop')
+    inlines = [ProductParameterInline]
 
 
 @admin.register(Parameter)

@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from celery.result import AsyncResult
 from django.urls import reverse
+from drf_spectacular.utils import extend_schema
 
 
 import logging
